@@ -1,0 +1,17 @@
+{
+	"name": "crema/helpers",
+	"description": "PHP Helper Functions",
+	"type": "library",
+	"autoload": {
+		"files": [
+			"src/functions.php"
+		]
+	},
+	"authors": [
+		{
+			"name": "Stephen Ginn",
+			"email": "callaginn@users.noreply.github.com"
+		}
+	],
+	"require": {}
+}
