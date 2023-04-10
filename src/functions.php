@@ -3,6 +3,8 @@
 	putenv("HOME=$home");
 	putenv('PATH=$PATH:/bin:/usr/bin:/usr/local/bin:$HOME/bin');
 	
+	define("JSON_PRETTIER", JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+	
 	// Yaml Parser
 	use Symfony\Component\Yaml\Yaml;
 	use Symfony\Component\Yaml\Exception\ParseException;
@@ -223,6 +225,17 @@
 	
 	function printData($filename) {
 		printJSON(json_decode(file_get_contents("$filename"), true));
+	}
+	
+	function dump($input) {
+		$type = gettype($input);
+		
+		if ($type == "object" or $type == "array") {
+			header('Content-Type: application/json');
+			echo json_encode((array) $input, JSON_PRETTIER);
+		} else {
+			echo $input;
+		}
 	}
 
 ?>
