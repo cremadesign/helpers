@@ -227,14 +227,17 @@
 		printJSON(json_decode(file_get_contents("$filename"), true));
 	}
 	
-	function dump($input) {
-		$type = gettype($input);
-		
-		if ($type == "object" or $type == "array") {
-			header('Content-Type: application/json');
-			echo json_encode((array) $input, JSON_PRETTIER);
-		} else {
-			echo $input;
+	// Make sure Symphony Dump Extension is not loaded
+	if (! function_exists('dump')) {
+		function dump($input) {
+			$type = gettype($input);
+			
+			if ($type == "object" or $type == "array") {
+				header('Content-Type: application/json');
+				echo json_encode((array) $input, JSON_PRETTIER);
+			} else {
+				echo $input;
+			}
 		}
 	}
 
