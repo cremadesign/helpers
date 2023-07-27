@@ -56,7 +56,7 @@
 	}
 	
 	// https://stackoverflow.com/a/55229702
-	class Haystack {
+	class Haystack extends \stdClass {
 		public $value;
 		
 		public function __construct($value) {
@@ -113,7 +113,7 @@
 		}
 	}
 	
-	class FrontMatter {
+	class FrontMatter extends \stdClass {
 		public $data;
 		public $content;
 		
@@ -181,7 +181,7 @@
 		$data['consoleString'] = $console->messages(true) ?? false;
 	/*/
 	
-	class HtmlConsole {
+	class HtmlConsole extends \stdClass {
 		public function __construct() {
 			$this->messages = [];
 		}
