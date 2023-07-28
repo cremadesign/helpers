@@ -17,6 +17,13 @@ require_once '../vendor/autoload.php';
 
 ## Usage
 
+### User Data
+```php
+$udata = new UData();
+$udata->getData();
+print $udata;
+```
+
 ### Arrays and Strings
 
 #### Get Ordinal ("st", "nd", "rd") for a number
