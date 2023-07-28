@@ -5,7 +5,7 @@ This repo contains a collection of reusable PHP helper functions.
 
 ## Installation
 You can install the package via composer:
-```php
+```bash
 composer config repositories.crema/helpers git https://github.com/cremadesign/helpers
 composer require crema/helpers:@dev
 ```
@@ -96,10 +96,58 @@ echo console("This is a test");
 #### Print JSON array to screen
 ```php
 $products = json_decode(file_get_contents("https://dummyjson.com/products/1"), true);
-echo printJSON($products);
+printJSON($products);
 ```
 
 #### Print JSON file to screen
 ```php
 echo printData("filename.json");
+```
+
+# Dreamhost API
+
+## Installation
+- Follow the installation steps above.
+- Add a file named credentials.json to the base of your project with the following info:
+```
+{
+	"userid": "DH_USER_ID",
+	"apikey": "DH_API_KEY",
+	"ip": "DEFAULT_HOST_IP"
+}
+```
+
+## Usage
+
+Add the composer autoloader to your PHP file:
+```php
+use Crema\DreamhostApi;
+
+$credentials = json_decode(file_get_contents("../credentials.json"));
+$account = $credentials->dreamhost;
+$dreamhost = new DreamhostApi($account);
+```
+
+### Get Records
+```php
+$response = $dreamhost->getRecords("thor.website.com");
+printJSON($response);
+```
+
+### Get Domains
+```php
+$response = $dreamhost->getDomains();
+printJSON($response);
+```
+
+### Add Record
+```php
+$response = $dreamhost->addRecord("thor.website.com", $account->ip);
+printJSON($response);
+```
+
+### Add Records
+```php
+$response = $dreamhost->addRecords("thor.website.com", $account->ip);
+printJSON($response);
 ```

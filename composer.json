@@ -4,7 +4,8 @@
 	"type": "library",
 	"autoload": {
 		"files": [
-			"src/functions.php"
+			"src/functions.php",
+			"src/dreamhost.php"
 		]
 	},
 	"authors": [
