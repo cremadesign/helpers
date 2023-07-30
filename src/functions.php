@@ -101,6 +101,23 @@
 	
 	// == LOAD DATA ============================================================
 	
+	// Load global and local variables into environment
+	function loadEnv() {
+		$env_global = parse_ini_file(`printf ~/.env`);
+		$env_local = parse_ini_file('../.env');
+		$env = (object) array_merge($env_global, $env_local);
+		
+		foreach ($env as $key => $value) {
+			putenv("$key=$value");
+		}
+	}
+	
+	// Return keys from 1Password CLI
+	function loadkey($key) {
+		$item = getenv($key);
+		return trim(shell_exec("op read $item 2>&1"));
+	}
+	
 	function loadData($filename, $basedir = "data/") {
 		$ext = pathinfo($filename, PATHINFO_EXTENSION);
 		$contents = file_get_contents("$basedir$filename");
