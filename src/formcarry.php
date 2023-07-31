@@ -2,7 +2,6 @@
 
 	namespace Crema;
 	
-	require_once '../vendor/autoload.php';
 	use Crema\CurlRequest;
 	use DateTime;
 	
