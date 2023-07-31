@@ -4,6 +4,7 @@
 	"type": "library",
 	"autoload": {
 		"files": [
+			"src/formcarry.php",
 			"src/functions.php",
 			"src/dreamhost.php",
 			"src/udata.php"
