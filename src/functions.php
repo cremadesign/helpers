@@ -102,9 +102,22 @@
 	// == LOAD DATA ============================================================
 	
 	// Load global and local variables into environment
+	// Run print phpinfo(INFO_ENVIRONMENT); to see values of everything
 	function loadEnv() {
-		$env_global = parse_ini_file(`printf ~/.env`);
-		$env_local = parse_ini_file('../.env');
+		$homedir = `printf ~`;
+		$basedir = dirname($_SERVER['DOCUMENT_ROOT']);
+		
+		$env_global = [];
+		$env_local = [];
+		
+		if (file_exists("$homedir/.env")) {
+			$env_global = parse_ini_file("$homedir/.env");
+		}
+		
+		if (file_exists("$basedir/.env")) {
+			$env_local = parse_ini_file("$basedir/.env");
+		}
+		
 		$env = (object) array_merge($env_global, $env_local);
 		
 		foreach ($env as $key => $value) {
