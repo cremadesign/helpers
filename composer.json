@@ -4,9 +4,11 @@
 	"type": "library",
 	"autoload": {
 		"files": [
-			"src/formcarry.php",
-			"src/functions.php",
+			"src/common.php",
 			"src/dreamhost.php",
+			"src/localhost.php",
+			"src/formcarry.php",
+			"src/sendEmail.php",
 			"src/udata.php"
 		]
 	},
