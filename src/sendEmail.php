@@ -39,6 +39,7 @@
 			$this->mail->Host       = $credentials->host;
 			$this->mail->Username   = $credentials->username;
 			$this->mail->Password   = $credentials->password;
+			$this->mail->Port       = $credentials->port; // 587 works best?
 		}
 		
 		public function setFrom($sender) {
