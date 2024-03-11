@@ -196,7 +196,7 @@
 			$logfile = "logs.log";
 			
 			if (is_array($message)) {
-				$message = json_encode($message, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+				$message = json_encode($message, JSON_PRETTIER);
 				$logfile = "logs.json";
 			}
 			
@@ -233,7 +233,7 @@
 				$messageString = "";
 				
 				foreach ($this->messages as $message) {
-					$msg = json_encode($message, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+					$msg = json_encode($message, JSON_PRETTIER);
 					$messageString .=  "console.log($msg);\n";
 				}
 				
@@ -250,25 +250,23 @@
 	
 	function printJSON($data) {
 		header('Content-Type: application/json');
-		echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+		echo json_encode($data, JSON_PRETTIER);
 	}
 	
 	function printData($filename) {
 		printJSON(json_decode(file_get_contents("$filename"), true));
 	}
 	
-	// Make sure Symphony Dump Extension is not loaded
-	if (! function_exists('dump')) {
-		function dump($input) {
-			$type = gettype($input);
-			
-			if ($type == "object" or $type == "array") {
-				header('Content-Type: application/json');
-				echo json_encode((array) $input, JSON_PRETTIER);
-			} else {
-				echo $input;
-			}
+	function dd($input) {
+		$type = gettype($input);
+		
+		if ($type === "object" || $type === "array") {
+			printJSON($input);
+		} else {
+			echo $input;
 		}
+		
+		exit();
 	}
 
 ?>
