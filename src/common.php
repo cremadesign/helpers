@@ -44,8 +44,8 @@
 		return $array[rand(0, count($array) - 1)];
 	}
 	
-	function slugify($string) {
-		return strtolower(trim(preg_replace('/[^A-z0-9-]+/', '-', $string), '-'));
+	function slugify($string, $delimiter = '-') {
+		return strtolower(trim(preg_replace('/[^A-z0-9-]+/', '-', $string), $delimiter));
 	}
 	
 	
