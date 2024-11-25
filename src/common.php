@@ -45,7 +45,7 @@
 	}
 	
 	function slugify($string, $delimiter = '-') {
-		return strtolower(trim(preg_replace('/[^A-z0-9-]+/', '-', $string), $delimiter));
+		return strtolower(trim(preg_replace('/[^A-z0-9-]+/', $delimiter, $string), $delimiter));
 	}
 	
 	
