@@ -257,16 +257,18 @@
 		printJSON(json_decode(file_get_contents("$filename"), true));
 	}
 	
-	function dd($input) {
-		$type = gettype($input);
-		
-		if ($type === "object" || $type === "array") {
-			printJSON($input);
-		} else {
-			echo $input;
+	if (!function_exists('dd')) {
+		function dd($input) {
+			$type = gettype($input);
+			
+			if ($type === "object" || $type === "array") {
+				printJSON($input);
+			} else {
+				echo $input;
+			}
+			
+			exit();
 		}
-		
-		exit();
 	}
 
 ?>
