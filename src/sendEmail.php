@@ -2,7 +2,6 @@
 	/*/ ========================================================================
 		PHP Emailer Helper Class
 		Stephen Ginn at Crema Design Studio
-		Updated on 07.27.23 for PHP 8.2
 	======================================================================== /*/
 	
 	use PHPMailer\PHPMailer\PHPMailer;
@@ -21,10 +20,10 @@
 			};
 			
 			// Server settings
-			$this->mail->SMTPDebug  = SMTP::DEBUG_SERVER;
+			$this->mail->SMTPDebug  = SMTP::DEBUG_CONNECTION;
 			$this->mail->isSMTP();
 			$this->mail->SMTPAuth   = true;
-			$this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+			$this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
 			
 			// Content Defaults
 			$this->mail->isHTML(true);
@@ -39,7 +38,7 @@
 			$this->mail->Host       = $credentials->host;
 			$this->mail->Username   = $credentials->username;
 			$this->mail->Password   = $credentials->password;
-			$this->mail->Port       = $credentials->port; // 587 works best?
+			$this->mail->Port       = $credentials->port;
 		}
 		
 		public function setFrom($sender) {
