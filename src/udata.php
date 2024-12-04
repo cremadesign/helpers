@@ -26,7 +26,7 @@
 			$ip = $_SERVER['HTTP_CLIENT_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
 			
 			if ($ip == '127.0.0.1') {
-				$ip = trim(`dig +short myip.opendns.com @resolver1.opendns.com`);
+				$ip = trim(`dig +short myip.opendns.com @resolver1.opendns.com` ?? '');
 			}
 			
 			return $ip;
