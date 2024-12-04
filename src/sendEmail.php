@@ -11,8 +11,11 @@
 	class Emailer {
 		public $mail;
 		public $output;
+		public $credentials;
+		public $recipient;
+		public $payload;
 		
-		public function __construct() {
+		public function __construct($credentials = null, $sender = null, $recipient = null) {
 			$this->mail = new PHPMailer(true);
 			
 			$this->mail->Debugoutput = function($str, $level) {
@@ -28,6 +31,21 @@
 			// Content Defaults
 			$this->mail->isHTML(true);
 			$this->mail->CharSet = 'UTF-8';
+			
+			// Set default values if not provided in config
+			if ($credentials) {
+				$this->login($credentials);
+			}
+			
+			if ($sender) {
+				$this->setFrom($sender);
+			}
+			
+			if ($recipient) {
+				$this->addAddress($recipient);
+			}
+			
+			return $this;
 		}
 		
 		public function login($credentials) {
@@ -50,16 +68,12 @@
 		}
 		
 		public function addAddress($recipients) {
-			if (gettype($recipients) == "array") {
-				$recipients = (object) $recipients;
-			}
-			
-			if (gettype($recipients) == "object") {
-				$recipients = [$recipients];
-			}
-			
-			foreach ($recipients as $recipient) {
-				$this->mail->addAddress($recipient->email, $recipient->name);
+			if (is_array($recipients)) {
+				foreach ($recipients as $recipient) {
+					$this->mail->addAddress($recipient->email, $recipient->name);
+				}
+			} else {
+				$this->mail->addAddress($recipients->email, $recipients->name);
 			}
 		}
 		
@@ -75,19 +89,25 @@
 			return $this->mail->ErrorInfo;
 		}
 		
-		public function sendEmail($payload) {
+		public function sendEmail($payload, callable $onSuccess = null, callable $onError = null) {
 			if (gettype($payload) == "array") {
 				$payload = (object) $payload;
 			}
-			
+	
 			$this->mail->Subject = $payload->subject;
 			$this->mail->Body    = $payload->body;
-			
+	
 			if ($this->mail->send()) {
-				echo $payload->body;
+				if ($onSuccess) {
+					call_user_func($onSuccess, $this->mail);
+				}
+				return true;
 			} else {
-				echo 'Message could not be sent.';
-				echo 'Mailer Error: ' . $this->mail->ErrorInfo;
+				error_log('Mailer Error: ' . $this->mail->ErrorInfo);
+				if ($onError) {
+					call_user_func($onError, $this->mail->ErrorInfo);
+				}
+				return false;
 			}
 		}
 	}

@@ -115,8 +115,8 @@ echo printData("filename.json");
 
 ## Installation
 - Follow the installation steps above.
-- Add a file named credentials.json to the base of your project with the following info:
-```
+- Add a file named credentials.json outside your public web folder with the following info:
+```json
 {
 	"userid": "DH_USER_ID",
 	"apikey": "DH_API_KEY",
@@ -158,3 +158,60 @@ printJSON($response);
 $response = $dreamhost->addRecords("thor.website.com", $account->ip);
 printJSON($response);
 ```
+
+# Send Email
+1. Add a file named credentials.json outside your public web folder with the following info:
+```json
+{
+	"email": {
+		"username": "email@example.com",
+		"password": "INSERT_PASSWORD_HERE",
+		"host": "secure.hostname.com",
+		"port": 465
+	},
+	"sender": {
+		"name": "Sender Name",
+		"email": "sending@example.com"
+	},
+	"recipient": {
+		"name": "Recipient Name",
+		"email": "recipient@example.com"
+	}
+}
+```
+
+2. Load the credentials and emailer within your PHP file:
+```php
+$credentials = json_decode(file_get_contents("../credentials.json"));
+$emailer = new Emailer($credentials->email, $credentials->sender, $recipient);
+```
+
+3. Send the email using one of the methods below:
+	- Send with Response
+	```php
+	$emailSent = $emailer->sendEmail([
+		'subject' => "Instagram App: New Client Added",
+		'body' => parsify($mjml)
+	]);
+
+	$alertClass = $emailSent ? 'alert-success' : 'alert-danger';
+	echo "Alert Class: $alertClass<br>";
+	echo $emailSent ? 'Your message has been sent' : 'Your message has not been sent';
+	```
+	
+	- Send with Callbacks
+	```php
+	$emailer->sendEmail([
+			'subject' => "Instagram App: New Account Invite",
+			'body' => parsify($mjml)
+		],
+		function($mail) use (&$response) {
+			$response->class = 'alert-success';
+			$response->msg = 'Your app invite was sent!';
+		}, 
+		function($errorInfo) use (&$response) {
+			$response->class = 'alert-danger';
+			$response->msg = 'Your app invite failed to send!';
+		}
+	);
+	```
