@@ -127,8 +127,13 @@
 	
 	// Return keys from 1Password CLI
 	function loadkey($key) {
-		$item = getenv($key);
-		return trim(shell_exec("op read $item 2>&1"));
+		if ($op = trim(shell_exec("which op"))) {
+			$item = getenv($key . '_REF');
+			return trim(shell_exec("op read $item 2>&1"));
+		} else {
+			$item = getenv($key . '_KEY');
+			return $item;
+		}
 	}
 	
 	function loadData($filename, $basedir = "data/") {
