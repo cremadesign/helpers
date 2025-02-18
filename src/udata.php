@@ -9,7 +9,7 @@
 			$this->ip = $this->getIP();
 			$protocol = (isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == "on") ? "https" : "http";
 			$this->referer = $_SERVER['HTTP_REFERER'] ?? "$protocol://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-			$this->userAgent = $_SERVER['HTTP_USER_AGENT'];
+			$this->userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
 			
 			$urls = [
 				"http://ip-api.com/json/$this->ip",
@@ -33,6 +33,10 @@
 		}
 		
 		public function getData() {
+			if (is_null($this->userAgent)) {
+				return [];
+			}
+			
 			// Build and Return JSON Array
 			$data = [
 				'lang' => substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '??', 0, 2),
@@ -50,7 +54,6 @@
 			// Get Browser and OS from User Agent
 			$clientHints = ClientHints::factory($_SERVER);
 			$dd = new DeviceDetector($this->userAgent, $clientHints);
-			
 			$dd->parse();
 			
 			if ($dd->isBot()) {
