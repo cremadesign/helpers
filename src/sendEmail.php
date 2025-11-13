@@ -100,9 +100,8 @@
 		}
 		
 		public function addAddress($recipients) {
-			if (!is_array($recipients)) {
-				$recipients = [$recipients];
-			}
+			// Normalize input to array format
+			$recipients = $this->normalizeRecipients($recipients);
 			
 			foreach ($recipients as $recipient) {
 				$recipient = $this->toObject($recipient);
@@ -116,6 +115,34 @@
 			}
 			
 			return $this;
+		}
+		
+		// Helper method to normalize recipient input to consistent format
+		private function normalizeRecipients($recipients) {
+			// If it's a string (single email), convert to array with email
+			if (is_string($recipients)) {
+				return [['email' => $recipients]];
+			}
+			
+			// If it's not an array, convert to array
+			if (!is_array($recipients)) {
+				return [['email' => (string) $recipients]];
+			}
+			
+			// Check if it's an associative array with 'email' key (single recipient object)
+			if (isset($recipients['email'])) {
+				return [$recipients];
+			}
+			
+			// Check if it's a numeric array of strings (array of email addresses)
+			if (isset($recipients[0]) && is_string($recipients[0])) {
+				return array_map(function($email) {
+					return ['email' => $email];
+				}, $recipients);
+			}
+			
+			// Already an array of recipient objects/arrays
+			return $recipients;
 		}
 		
 		public function clearAllRecipients() {
