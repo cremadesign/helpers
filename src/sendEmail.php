@@ -2,6 +2,7 @@
 	/*/ ========================================================================
 		PHP Emailer Helper Class
 		Stephen Ginn at Crema Design Studio
+		Updated on 2025-11-13
 	======================================================================== /*/
 	
 	use PHPMailer\PHPMailer\PHPMailer;
@@ -19,20 +20,19 @@
 			$this->mail = new PHPMailer(true);
 			
 			$this->mail->Debugoutput = function($str, $level) {
-				$this->output = $str;
+				$this->output .= $str . "\n"; // Append instead of overwrite
 			};
 			
-			// Server settings
-			$this->mail->SMTPDebug  = SMTP::DEBUG_CONNECTION;
+			// Server settings - Only enable debug in development
+			$this->mail->SMTPDebug = $this->isDevelopment() ? SMTP::DEBUG_SERVER : SMTP::DEBUG_OFF;
 			$this->mail->isSMTP();
-			$this->mail->SMTPAuth   = true;
-			$this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+			$this->mail->SMTPAuth = true;
 			
 			// Content Defaults
 			$this->mail->isHTML(true);
 			$this->mail->CharSet = 'UTF-8';
 			
-			// Set default values if not provided in config
+			// Set default values if provided
 			if ($credentials) {
 				$this->login($credentials);
 			}
@@ -48,37 +48,79 @@
 			return $this;
 		}
 		
+		private function isDevelopment() {
+			return str_ends_with($_SERVER['HTTP_HOST'], '.test');
+		}
+		
 		public function login($credentials) {
-			if (gettype($credentials) == "array") {
-				$credentials = (object) $credentials;
+			$credentials = $this->toObject($credentials);
+			
+			// Validate required credentials
+			if (!isset($credentials->host, $credentials->username, $credentials->password, $credentials->port)) {
+				throw new Exception('Missing required credentials: host, username, password, port');
 			}
 			
-			$this->mail->Host       = $credentials->host;
-			$this->mail->Username   = $credentials->username;
-			$this->mail->Password   = $credentials->password;
-			$this->mail->Port       = $credentials->port;
+			$this->mail->Host = $credentials->host;
+			$this->mail->Username = $credentials->username;
+			$this->mail->Password = $credentials->password;
+			$this->mail->Port = (int) $credentials->port;
+			
+			// Set encryption type based on port
+			if ($credentials->port == 465) {
+				$this->mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+			} elseif ($credentials->port == 587) {
+				$this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+			}
+			
+			// Only disable SSL verification in development
+			if ($this->isDevelopment()) {
+				$this->mail->SMTPOptions = [
+					'ssl' => [
+						'verify_peer' => false,
+						'verify_peer_name' => false,
+						'allow_self_signed' => true
+					]
+				];
+			}
+			
+			return $this;
 		}
 		
 		public function setFrom($sender) {
-			if (gettype($sender) == "array") {
-				$sender = (object) $sender;
+			$sender = $this->toObject($sender);
+			
+			if (!isset($sender->email)) {
+				throw new Exception('Sender email is required');
 			}
 			
-			$this->mail->setFrom($sender->email, $sender->name);
+			$name = $sender->name ?? '';
+			$this->mail->setFrom($sender->email, $name);
+			
+			return $this;
 		}
 		
 		public function addAddress($recipients) {
-			if (is_array($recipients)) {
-				foreach ($recipients as $recipient) {
-					$this->mail->addAddress($recipient->email, $recipient->name);
-				}
-			} else {
-				$this->mail->addAddress($recipients->email, $recipients->name);
+			if (!is_array($recipients)) {
+				$recipients = [$recipients];
 			}
+			
+			foreach ($recipients as $recipient) {
+				$recipient = $this->toObject($recipient);
+				
+				if (!isset($recipient->email) || !filter_var($recipient->email, FILTER_VALIDATE_EMAIL)) {
+					throw new Exception('Invalid recipient email: ' . ($recipient->email ?? 'null'));
+				}
+				
+				$name = $recipient->name ?? '';
+				$this->mail->addAddress($recipient->email, $name);
+			}
+			
+			return $this;
 		}
 		
 		public function clearAllRecipients() {
 			$this->mail->clearAllRecipients();
+			return $this;
 		}
 		
 		public function getAddresses() {
@@ -89,26 +131,46 @@
 			return $this->mail->ErrorInfo;
 		}
 		
+		public function getDebugOutput() {
+			return $this->output;
+		}
+		
 		public function sendEmail($payload, callable $onSuccess = null, callable $onError = null) {
-			if (gettype($payload) == "array") {
-				$payload = (object) $payload;
+			$payload = $this->toObject($payload);
+			
+			if (!isset($payload->subject) || !isset($payload->body)) {
+				throw new Exception('Email payload must include subject and body');
 			}
 	
 			$this->mail->Subject = $payload->subject;
-			$this->mail->Body    = $payload->body;
+			$this->mail->Body = $payload->body;
+			
+			// Set plain text alternative if provided
+			if (isset($payload->altBody)) {
+				$this->mail->AltBody = $payload->altBody;
+			}
 	
-			if ($this->mail->send()) {
-				if ($onSuccess) {
-					call_user_func($onSuccess, $this->mail);
+			try {
+				if ($this->mail->send()) {
+					if ($onSuccess) {
+						call_user_func($onSuccess, $this->mail);
+					}
+					return true;
 				}
-				return true;
-			} else {
+			} catch (Exception $e) {
 				error_log('Mailer Error: ' . $this->mail->ErrorInfo);
 				if ($onError) {
 					call_user_func($onError, $this->mail->ErrorInfo);
 				}
 				return false;
 			}
+			
+			return false;
+		}
+		
+		// Helper method to convert arrays to objects
+		private function toObject($data) {
+			return is_array($data) ? (object) $data : $data;
 		}
 	}
 ?>
